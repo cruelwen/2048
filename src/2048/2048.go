@@ -6,6 +6,7 @@ import (
   "os"
   "math/rand"
   "time"
+  "fmt"
 )
 
 type typeCode [4][4]int
@@ -25,10 +26,6 @@ func main() {
     code.changeWithInput()
     code.addNew()
   }
-}
-
-func genCode() (ret [16]int) {
-  return
 }
 
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
@@ -54,12 +51,37 @@ func (code *typeCode) print() {
   termbox.Flush()
 }
 
+func (code typeCode) max() (max int) {
+  max = 0
+  for _,line := range code {
+    for _,number := range line {
+      if number > max {
+        max = number
+      }
+    }
+  }
+  return max
+}
+
+func (code typeCode) min() (min int) {
+  min = 10
+  for _,line := range code {
+    for _,number := range line {
+      if number < min {
+        min = number
+      }
+    }
+  }
+  return min
+}
+
 func (code *typeCode) changeWithInput() {
   switch ev := termbox.PollEvent(); ev.Type {
   case termbox.EventKey:
     switch ev.Key {
     case termbox.KeyEsc:
       termbox.Close()
+      fmt.Println("Bye")
       os.Exit(0)
     case termbox.KeyArrowLeft:
       code.changeLeft()
@@ -77,16 +99,96 @@ func (code *typeCode) changeWithInput() {
 }
 
 func (code *typeCode) addNew() {
-  x := rand.Intn(4)
-  y := rand.Intn(4)
-  code[x][y] = 1
+  if code.min() != 0 {
+    termbox.Close()
+    fmt.Println("Lose")
+    os.Exit(0)
+  }
+  if code.max() == 10 {
+    termbox.Close()
+    fmt.Println("Win")
+    os.Exit(0)
+  }
+  x,y:=rand.Intn(4),rand.Intn(4)
+  for code[x][y] != 0 {
+    x,y = rand.Intn(4),rand.Intn(4)
+  }
+  code[x][y] = rand.Intn(2) + 1
 }
 
 func (code *typeCode) changeLeft() {
+  for i:=0;i<4;i++ {
+    for j:=0;j<4;j++ {
+      for k:=j+1;k<4;k++ {
+        if code[i][k] != 0 {
+          switch {
+          case code[i][j] == 0:
+            code[i][j] = code[i][k]
+            code[i][k] = 0
+          case code[i][j] == code[i][k]:
+            code[i][j] ++ 
+            code[i][k] = 0
+          }
+          break
+        }
+      }
+    }
+  }
 }
 func (code *typeCode) changeRight() {
+  for i:=0;i<4;i++ {
+    for j:=3;j>=0;j-- {
+      for k:=j-1;k>=0;k-- {
+        if code[i][k] != 0 {
+          switch {
+          case code[i][j] == 0:
+            code[i][j] = code[i][k]
+            code[i][k] = 0
+          case code[i][j] == code[i][k]:
+            code[i][j] ++ 
+            code[i][k] = 0
+          }
+          break
+        }
+      }
+    }
+  }
 }
 func (code *typeCode) changeUp() {
+  for j:=0;j<4;j++ {
+    for i:=0;i<4;i++ {
+      for k:=i+1;k<4;k++ {
+        if code[k][j] != 0 {
+          switch {
+          case code[i][j] == 0:
+            code[i][j] = code[k][j]
+            code[k][j] = 0
+          case code[i][j] == code[k][j]:
+            code[i][j] ++ 
+            code[k][j] = 0
+          }
+          break
+        }
+      }
+    }
+  }
 }
 func (code *typeCode) changeDown() {
+  for j:=0;j<4;j++ {
+    for i:=3;i>=0;i-- {
+      for k:=i-1;k>=0;k-- {
+        if code[k][j] != 0 {
+          switch {
+          case code[i][j] == 0:
+            code[i][j] = code[k][j]
+            code[k][j] = 0
+          case code[i][j] == code[k][j]:
+            code[i][j] ++ 
+            code[k][j] = 0
+          }
+          break
+        }
+      }
+    }
+  }
 }
